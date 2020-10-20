@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Favorite Movies</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/css/bootstrap.min.css"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="jumbotron">
+        <h1>Daily Planner</h1>
+        <h2 id="date">Today's Date</h2>
+      </div>
+      <table class="table"></table>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script type="text/javascript">
+      //Hour object
+      var hours = [];
+      var hoursTemplate = [
+        { string: "9AM", value: 9, text: "" },
+        { string: "10AM", value: 10, text: "" },
+        { string: "11AM", value: 11, text: "" },
+        { string: "12PM", value: 12, text: "" },
+        { string: "1PM", value: 13, text: "" },
+        { string: "2PM", value: 14, text: "" },
+        { string: "3PM", value: 15, text: "" },
+        { string: "4PM", value: 16, text: "" },
+        { string: "5PM", value: 17, text: "" },
+      ];
+
+      var localContent = localStorage.getItem("hourData");
+
+      // //This checks for a local data save if not there than
+      if (!localContent) {
+        hours = hoursTemplate;
+      } else {
+        localContent = JSON.parse(localContent);
+        hours = localContent;
+        console.log(hours);
+      }
+
+      //display the current day
+      var dateObj = new Date();
+
+      getCurrentDay();
+      function getCurrentDay() {
+        var monthName = [
+          "January",
+          "February",
+          "March",
+          "April",
+          "May",
+          "June",
+          "July",
+          "August",
+          "September",
+          "October",
+          "November",
+          "December",
+        ];
+        var month = dateObj.getMonth(); //months from 1-12
+        var day = dateObj.getDate();
+        var year = dateObj.getFullYear();
+
+        var date = $("<h3>");
+        date.text(monthName[month] + " " + day + ", " + year);
+        $("#date").append(date);
+      }
+      //Add rows to the table element known as a timeblock
+
+      displayRows();
+
+      function displayRows() {
+        //init table
+        var tBody = $(".table");
+
+        //for loop for all the rows
+        for (var i = 0; i < hours.length; i++) {
+          var block = hours[i];
+
+          //Each time slot
+          var tbRow = $("<tr>");
+          tbRow.addClass("center");
+          //Time
+          var hour = $("<td>");
+          hour.addClass("hour time-blocks");
+          hour.text(hours[i].string);
+          tbRow.append(hour);
+
+          //Text Area
+          var textDiv = $("<td>");
+          var textArea = $("<textarea>");
+          textArea.text(hours[i].text);
+          textArea.attr("id", "form-" + i);
+          textArea.addClass("textBox");
+          
+          //set the text value of text area to the block.text
+          textDiv.append(textArea);
+
+          tbRow.append(textDiv);
+
+          //Save Button
+          var saveBtn = $("<td><span>Save</span></td>");
+          saveBtn.addClass("saveBtn");
+          tbRow.append(saveBtn);
+
+          //Check whether past present or future
+
+          if (block.value === dateObj.getHours()) {
+            textDiv.addClass("present");
+          }
+          if (block.value > dateObj.getHours()) {
+            textDiv.addClass("future");
+          }
+          if (block.value < dateObj.getHours()) {
+            textDiv.addClass("past");
+          }
+
+          tBody.append(tbRow);
+        }
+      }
+
+      $(".saveBtn").on("click", function () {
+        //for loop to update each textbox
+        for (var i = 0; i < hours.length; i++) {
+          var blockText = hours[i];
+          var text = $("#form-" + i).val();
+          blockText.text = text;
+        }
+        //Sets the local storage to the hours being used either template or previous save
+        localContent = hours;
+        localStorage.setItem("hourData", JSON.stringify(localContent));
+      });
+    </script>
+  </body>
+</html>
